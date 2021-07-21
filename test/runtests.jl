@@ -2,5 +2,6 @@ using ProjAssistant
 using Test
 
 @testset "ProjAssistant.jl" begin
-    # Write your tests here.
+    include("cache_tests.jl")
+    include("proj_gen_tests.jl")
 end

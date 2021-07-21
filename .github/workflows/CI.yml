@@ -1,7 +1,12 @@
 name: CI
 on:
-  - push
-  - pull_request
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+    tags: '*'
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
@@ -10,11 +15,13 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.5'
-          - '1.6'
+          - '1.5' # Replace this with the minimum Julia version that your package supports. E.g. if your package requires Julia 1.5 or higher, change this to '1.5'.
+          - '1' # Leave this line unchanged. '1' will automatically expand to the latest stable 1.x release of Julia.
           - 'nightly'
         os:
           - ubuntu-latest
+#           - macOS-latest
+#           - windows-latest
         arch:
           - x64
     steps:
@@ -33,5 +40,6 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      - run: julia -e 'import Pkg; Pkg.Registry.add(Pkg.RegistrySpec(url = "https://github.com/josePereiro/CSC_Registry.jl"))'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
