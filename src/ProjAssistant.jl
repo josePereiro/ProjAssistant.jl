@@ -2,6 +2,7 @@ module ProjAssistant
 
     using DataFileNames
     import DrWatson
+    import DrWatson: quickactivate, @quickactivate
     import Logging
     import Logging: SimpleLogger, global_logger, with_logger
     using Base.Threads
