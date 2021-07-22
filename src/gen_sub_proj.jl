@@ -1,3 +1,7 @@
+_sfig(x...; k...) = isdefined(ProjAssistant, :ImgTools) ? 
+    ImgTools.sfig(x...; k...) : error("You must 'import Plots'")
+_sgif(x...; k...) = isdefined(ProjAssistant, :ImgTools) ? 
+    ImgTools.sgif(x...; k...) : error("You must 'import Plots'")
 
 function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
 
@@ -74,6 +78,13 @@ function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
 
         lrawdat(f::Function, arg, args...; kwargs...) = $(ldat)(f, rawdir(arg, args...); kwargs...)
         lrawdat(arg, args...; kwargs...) = $(ldat)(rawdir(arg, args...); kwargs...)
+    end
+    
+    # ---------------------------------------------------------------------
+    # save/load fig
+    @eval currmod begin 
+        sfig(p, arg, args...; kwargs...) = $(_sfig)(p, plotsdir(arg, args...); kwargs...)
+        sgif(p, arg, args...; kwargs...) = $(_sgif)(p, plotsdir(arg, args...); kwargs...)
     end
 
     # ---------------------------------------------------------------------

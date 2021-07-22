@@ -3,6 +3,7 @@
 _TO_REMOVE = []
 for fun_flag in [true, false]
 
+    plot = ProjAssistant.ImgTools.Plots.plot
     RTAG = string(rand(UInt))
     TopMod = Symbol("Top", RTAG)
     Sub1Mod = Symbol("Sub1")
@@ -179,9 +180,33 @@ for fun_flag in [true, false]
                 @test all(dat0 .== dat1)
 
             end
-        end
 
-        Top
+            ## ------------------------------------------------------------
+            # save imgs
+            @info("Top cache")
+            for Mod in [Sub1, Sub3]
+
+                @info("save imgs", Mod)
+                figfile0 = Mod.plotsdir("test", (;A = 1), ".png")
+
+                p = plot(rand(100))
+                figfile1 = Mod.sfig(p, "test", (;A = 1), ".png")
+                @test figfile0 == figfile1
+                @test isfile(figfile1)
+
+                ps = map((_) -> plot(rand(100)), 1:10)
+                figfile1 = Mod.sfig(ps, "test", (;A = 1), ".png")
+                @test figfile0 == figfile1
+                @test isfile(figfile1)
+
+                figfile0 = Mod.plotsdir("test", (;A = 1), ".gif")
+                figfile1 = Mod.sgif(ps, "test", (;A = 1), ".gif")
+                @test figfile0 == figfile1
+                @test isfile(figfile1)
+
+            end
+
+        end
 
     finally
         rm.(_TO_REMOVE; force = true, recursive = true)

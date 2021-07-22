@@ -1,5 +1,6 @@
 using ProjAssistant
 using Test
+using Plots
 
 @testset "ProjAssistant.jl" begin
     include("cache_tests.jl")

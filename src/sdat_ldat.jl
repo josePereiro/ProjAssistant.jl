@@ -70,4 +70,4 @@ function _cut_hash(commit_hash, l = SHORT_HASH_LENGTH)
     endswith(commit_hash, DIRTY_SUFFIX) ? string(short_hash, DIRTY_SUFFIX) : short_hash
 end
 
-load_patch(datfile) = get(_load(datfile), GIT_PATCH_KEY, "")
+lgitpatth(args...) = get(ldat(args...), GIT_PATCH_KEY, "")

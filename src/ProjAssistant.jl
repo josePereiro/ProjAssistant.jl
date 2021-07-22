@@ -7,7 +7,8 @@ module ProjAssistant
     using Base.Threads
     import Serialization: serialize, deserialize
     import FileIO
-
+    import Requires: @require
+    
     include("utils.jl")
     include("_io_print.jl")
     include("io_global_conf.jl")
@@ -22,6 +23,13 @@ module ProjAssistant
 
     function __init__()
         _init_globals()
+
+        @require Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80" begin
+
+            import ImgTools
+            import ImgTools: sfig, sgif
+            
+         end
     end
 
 end
