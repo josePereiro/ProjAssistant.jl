@@ -21,6 +21,7 @@ module ProjAssistant
     include("gen_sub_proj.jl")
     include("gen_top_proj.jl")
     include("create_proj_dirs.jl")
+    include("_sfig.jl")
 
     function __init__()
         _init_globals()

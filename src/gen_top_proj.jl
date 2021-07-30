@@ -100,6 +100,13 @@ function gen_top_proj(mod::Module, dir = nothing)
         lrawdat(f::Function, arg, args...; kwargs...) = $(ldat)(f, rawdir(arg, args...); kwargs...)
         lrawdat(arg, args...; kwargs...) = $(ldat)(rawdir(arg, args...); kwargs...)
     end
+
+    # ---------------------------------------------------------------------
+    # save/load fig
+    @eval mod begin 
+        sfig(p, arg, args...; kwargs...) = $(_sfig)(p, plotsdir(arg, args...); kwargs...)
+        sgif(p, arg, args...; kwargs...) = $(_sgif)(p, plotsdir(arg, args...); kwargs...)
+    end
     
     # ---------------------------------------------------------------------
     # save/load cache

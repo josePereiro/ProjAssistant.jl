@@ -1,22 +1,20 @@
 ## ----------------------------------------------------------------------------
-# GLOBALS
-const GLOBALS = Dict()
-const CFNAME_EXT = ".cache.jls"
-const DATA_KEY = :dat
+# _GLOBAL_CONF
+const _GLOBAL_CONF = Dict()
 
 function _init_globals()
-    empty!(GLOBALS)
-    GLOBALS[:CACHE_DIR] = pwd()
-    GLOBALS[:VERBOSE] = false
-    GLOBALS[:PRINT_FUN] = Base.println
+    empty!(_GLOBAL_CONF)
+    _GLOBAL_CONF[:CACHE_DIR] = pwd()
+    _GLOBAL_CONF[:VERBOSE] = false
+    _GLOBAL_CONF[:PRINT_FUN] = Base.println
+    _GLOBAL_CONF[:LOAD_FUN] = _load
+    _GLOBAL_CONF[:SAVE_FUN] = _save
+    _GLOBAL_CONF[:ADD_TAG] = false
+    _GLOBAL_CONF[:MK_DIR] = false
 end
 
 ## ----------------------------------------------------------------------------
-set_cache_dir(cache_dir::String) = (GLOBALS[:CACHE_DIR] = cache_dir)
-get_cache_dir() = GLOBALS[:CACHE_DIR]
-set_verbose(verbose::Bool) = (GLOBALS[:VERBOSE] = verbose)
-get_verbose() = GLOBALS[:VERBOSE]
-set_fileid(fileid) = (GLOBALS[:FILEID] = string(fileid))
-get_fileid() = GLOBALS[:FILEID]
-get_print_fun() = GLOBALS[:PRINT_FUN]
-set_print_fun(pf::Function) = (GLOBALS[:PRINT_FUN] = pf)
+_toupper(s::Symbol) = Symbol(uppercase(string(s)))
+global_conf() = _GLOBAL_CONF
+global_conf(id::Symbol) = getindex(_GLOBAL_CONF, _toupper(id))
+global_conf(id::Symbol, val) = (setindex!(_GLOBAL_CONF, val, _toupper(id)); val)

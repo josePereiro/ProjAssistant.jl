@@ -1,4 +1,5 @@
-# TODO: Use Caching.jl
+const CFNAME_EXT = ".cache.jls"
+
 ## ----------------------------------------------------------------------------
 function is_cfname(fname)
     fname = basename(fname)
@@ -24,10 +25,10 @@ cfname() = cfname(time(), rand())
 ## ----------------------------------------------------------------------------
 function scache(dat, dirs::Vector{<:AbstractString}, arg, args...; 
         headline::AbstractString = "CACHE SAVED",
-        verbose::Bool = get_verbose(), 
+        verbose::Bool = global_conf(:VERBOSE), 
         onerr::Function = (err) -> rethrow(err), 
-        print_fun::Function = get_print_fun(), 
-        mkdir::Bool = false
+        print_fun::Function = global_conf(:PRINT_FUN), 
+        mkdir::Bool = global_conf(:MK_DIR)
     )
 
     cfile = cfname(arg, args...)
@@ -45,24 +46,24 @@ end
 
 # defaults
 scache(dat, arg, args...; kwargs...) = 
-    scache(dat, [get_cache_dir()], arg, args...; kwargs...)
+    scache(dat, [global_conf(:CACHE_DIR)], arg, args...; kwargs...)
     
 scache(f::Function, arg, args...; kwargs...) = 
-    scache(f(), [get_cache_dir()], arg, args...; kwargs...)
+    scache(f(), [global_conf(:CACHE_DIR)], arg, args...; kwargs...)
 
 scache(dat; kwargs...) = 
-    scache(dat, [get_cache_dir()], time(), rand(); kwargs...)
+    scache(dat, [global_conf(:CACHE_DIR)], time(), rand(); kwargs...)
 
 scache(f::Function; kwargs...) = 
-    scache(f(), [get_cache_dir()], time(), rand(); kwargs...)
+    scache(f(), [global_conf(:CACHE_DIR)], time(), rand(); kwargs...)
 
 ## ----------------------------------------------------------------------------
 function _lcache(f::Function, savecache::Bool, dirs::Vector{<:AbstractString}, arg, args...; 
         headline::AbstractString = "CACHE LOADED",
-        verbose::Bool = get_verbose(), 
+        verbose::Bool = global_conf(:VERBOSE), 
         onerr::Function = (err) -> rethrow(err),
-        print_fun::Function = get_print_fun(), 
-        mkdir::Bool = false
+        print_fun::Function = global_conf(:PRINT_FUN), 
+        mkdir::Bool = global_conf(:MK_DIR)
     )
     
     cfile = cfname(arg, args...)
@@ -86,19 +87,19 @@ function lcache(f::Function, dirs::Vector{<:AbstractString}, arg, args...;
 end
 
 lcache(f::Function, arg, args...; kwargs...) = 
-    lcache(f::Function, [get_cache_dir()], arg, args...; kwargs...)
+    lcache(f::Function, [global_conf(:CACHE_DIR)], arg, args...; kwargs...)
 
 function lcache(dirs::Vector{<:AbstractString}, arg, args...; kwargs...) 
     _lcache(() -> nothing, false, dirs, arg, args...; kwargs...)
 end
 
 lcache(arg, args...; kwargs...) = 
-    lcache([get_cache_dir()], arg, args...; kwargs...)
+    lcache([global_conf(:CACHE_DIR)], arg, args...; kwargs...)
 
 ## ----------------------------------------------------------------------------
 function delcache(dirs::Vector{<:AbstractString}, arg, args...; 
-        verbose::Bool = get_verbose(), 
-        print_fun::Function = get_print_fun()
+        verbose::Bool = global_conf(:VERBOSE), 
+        print_fun::Function = global_conf(:PRINT_FUN)
     )
     cfile = cfname(arg, args...)
     cfile = joinpath(dirs..., cfile)
@@ -108,11 +109,11 @@ function delcache(dirs::Vector{<:AbstractString}, arg, args...;
 end
 
 delcache(arg, args...; kwargs...) = 
-    delcache([get_cache_dir()], arg, args...; kwargs...)
+    delcache([global_conf(:CACHE_DIR)], arg, args...; kwargs...)
 
 function delcache(dirs::Vector{<:AbstractString};
-        verbose::Bool = get_verbose(), 
-        print_fun::Function = get_print_fun()
+        verbose::Bool = global_conf(:VERBOSE), 
+        print_fun::Function = global_conf(:PRINT_FUN)
     )
     cache_dir = joinpath(dirs...)
     tcaches = filter(is_cfname, readdir(cache_dir))
@@ -124,7 +125,7 @@ function delcache(dirs::Vector{<:AbstractString};
     return cache_dir
 end
 
-delcache(; kwargs...) = delcache([get_cache_dir()]; kwargs...)
+delcache(; kwargs...) = delcache([global_conf(:CACHE_DIR)]; kwargs...)
 
 ## ----------------------------------------------------------------------------
 function exist_cache(dirs::Vector{<:AbstractString}, arg, args...)
@@ -132,11 +133,11 @@ function exist_cache(dirs::Vector{<:AbstractString}, arg, args...)
     cfile = joinpath(dirs..., cfile)
     isfile(cfile)
 end
-exist_cache(arg, args...) = exist_cache([get_cache_dir()], arg, args...)
+exist_cache(arg, args...) = exist_cache([global_conf(:CACHE_DIR)], arg, args...)
     
 ## ----------------------------------------------------------------------------
 function backup_cachedir(;
-        cache_dir::AbstractString = get_cache_dir(),
+        cache_dir::AbstractString = global_conf(:CACHE_DIR),
         backup_dir::AbstractString = string(cache_dir, "_backup")
     )
     tcaches = filter(is_cfname, readdir(cache_dir))

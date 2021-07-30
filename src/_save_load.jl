@@ -1,17 +1,5 @@
 # ------------------------------------------------------------------
-function _load(file)
-    if endswith(file, ".jls")
-        deserialize(file)
-    else
-        FileIO.load(file)
-    end
-end
+_load(file) = endswith(file, ".jls") ? deserialize(file) : FileIO.load(file)
 
 # ------------------------------------------------------------------
-function _save(file, dat)
-    if endswith(file, ".jls")
-        serialize(file, dat)
-    else
-        FileIO.save(file, dat)
-    end
-end
+_save(file, dat) = endswith(file, ".jls") ? serialize(file, dat) : FileIO.save(file, dat)

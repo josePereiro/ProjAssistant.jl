@@ -15,7 +15,7 @@ for fun_flag in [true, false]
     try
         # ---------------------------------------------------------------------
         # verbose
-        ProjAssistant.set_verbose(fun_flag)
+        ProjAssistant.global_conf(:VERBOSE, fun_flag)
 
         # ---------------------------------------------------------------------
         # prepare test "project"
@@ -184,7 +184,7 @@ for fun_flag in [true, false]
             ## ------------------------------------------------------------
             # save imgs
             @info("Top cache")
-            for Mod in [Sub1, Sub3]
+            for Mod in [Top, Sub1, Sub3]
 
                 @info("save imgs", Mod)
                 figfile0 = Mod.plotsdir("test", (;A = 1), ".png")

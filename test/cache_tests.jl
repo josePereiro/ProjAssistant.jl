@@ -1,7 +1,7 @@
 function cache_tests()
     
     @info "cache_tests"
-    ProjAssistant.set_cache_dir(tempdir())
+    ProjAssistant.global_conf(:CACHE_DIR, tempdir())
     N = 15
     dat0 = rand(N)
 

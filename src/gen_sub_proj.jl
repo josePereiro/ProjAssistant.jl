@@ -1,7 +1,4 @@
-_sfig(x...; k...) = isdefined(ProjAssistant, :ImgTools) ? 
-    ImgTools.sfig(x...; k...) : error("You must 'import Plots'")
-_sgif(x...; k...) = isdefined(ProjAssistant, :ImgTools) ? 
-    ImgTools.sgif(x...; k...) : error("You must 'import Plots'")
+
 
 function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
 

@@ -1,5 +1,6 @@
 # Based in DrWatson
 
+const DATA_KEY = :dat
 const GIT_COMMIT_KEY = :gitcommit
 const GIT_PATCH_KEY = :gitpatch
 const DIRTY_SUFFIX = "_dirty"
@@ -8,11 +9,11 @@ const ERROR_LOGGER = SimpleLogger(stdout, Logging.Error)
 
 # ------------------------------------------------------------------
 function ldat(dfargs...; 
-        print_fun = println, 
-        headline = "DATA LOADED",
-        verbose = true,
-        load_fun = _load, 
-        mkdir::Bool = false
+        print_fun::Function = global_conf(:PRINT_FUN), 
+        headline::AbstractString = "DATA LOADED",
+        verbose::Bool = global_conf(:VERBOSE),
+        load_fun::Function = global_conf(:LOAD_FUN), 
+        mkdir::Bool = global_conf(:MK_DIR)
     )
 
     datfile = dfname(dfargs...)
@@ -35,11 +36,11 @@ end
 # ------------------------------------------------------------------
 function sdat(f::Function, dfargs...; 
         headline::AbstractString = "DATA SAVED",
-        verbose::Bool = true, 
-        print_fun::Function = println, 
-        addtag::Bool = false,
-        savefun::Function = _save,
-        mkdir::Bool = false
+        verbose::Bool = global_conf(:VERBOSE), 
+        print_fun::Function = global_conf(:PRINT_FUN), 
+        addtag::Bool = global_conf(:ADD_TAG),
+        savefun::Function = global_conf(:SAVE_FUN),
+        mkdir::Bool = global_conf(:MK_DIR)
     )
     dat = f()
     datfile = dfname(dfargs...)
