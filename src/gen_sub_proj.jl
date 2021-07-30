@@ -103,19 +103,30 @@ function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
     @eval currmod begin
 
         const _GLOBALS_EXT = ".global.jls"
-        _global_file(gid) = procdir(string(gid), _GLOBALS_EXT)
+        function globfile(gid, gids...)
+            gids = string.([gid, gids...])
+            procdir(join(gids, "."), _GLOBALS_EXT)
+        end
 
-        function lglob(gid::Symbol)
-            fname = _global_file(gid)
-            !isfile(fname) && error("global is missing, gid '", gid, "'")
+        function lglob(gid::Symbol, gids::Symbol...)
+            fname = globfile(gid, gids...)
+            !isfile(fname) && error("global is missing, glob file '", basename(fname), "' not found")
             return ldat(fname; verbose = false)
         end
 
-        lglob(gid::Symbol, gids::Symbol...) = map(lglob, (gid, gids...))
+        function lglob(gidv::Vector) 
+            map(gidv) do arg
+                (arg isa Symbol) ? lglob(arg) : lglob(arg...)
+            end
+        end
+
+        macro lglob(ex...)
+            $(_lglob_macro_ex)(@__MODULE__, ex...)
+        end
 
         ## ------------------------------------------------------------
-        function sglob(dat, gid::Symbol)
-            fname = _global_file(gid)
+        function sglob(dat, gid::Symbol, gids::Symbol...)
+            fname = globfile(gid, gids...)
             sdat(dat, fname; verbose = false)
         end
 
@@ -125,10 +136,14 @@ function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
             end
         end
 
-        sglob(f::Function, gid::Symbol) = sglob(f(), gid)
+        sglob(f::Function, gid::Symbol, gids::Symbol...) = sglob(f(), gid, gids)
+
+        macro sglob(ex...)
+            $(_sglob_macro_ex)(@__MODULE__, ex...)
+        end
 
         ## ------------------------------------------------------------
-        delglob(gid::Symbol) = rm(_global_file(gid); force = true)
+        delglob(gid::Symbol, gids::Symbol...) = rm(globfile(gid, gids...); force = true)
 
     end
     

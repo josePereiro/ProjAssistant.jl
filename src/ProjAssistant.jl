@@ -1,5 +1,6 @@
 module ProjAssistant
 
+
     using DataFileNames
     import DrWatson
     import DrWatson: quickactivate, @quickactivate
@@ -22,6 +23,7 @@ module ProjAssistant
     include("gen_top_proj.jl")
     include("create_proj_dirs.jl")
     include("_sfig.jl")
+    include("sglob_lglob_macros_ex.jl")
 
     function __init__()
         _init_globals()
