@@ -120,8 +120,8 @@ function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
             end
         end
 
-        macro lglob(ex...)
-            $(_lglob_macro_ex)(@__MODULE__, ex...)
+        macro lglob(ex, exs...)
+            $(_lglob_macro_ex)($(currmod), ex, exs...)
         end
 
         ## ------------------------------------------------------------
@@ -138,8 +138,8 @@ function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
 
         sglob(f::Function, gid::Symbol, gids::Symbol...) = sglob(f(), gid, gids)
 
-        macro sglob(ex...)
-            $(_sglob_macro_ex)(@__MODULE__, ex...)
+        macro sglob(ex, exs...)
+            $(_sglob_macro_ex)($(currmod), ex, exs...)
         end
 
         ## ------------------------------------------------------------
