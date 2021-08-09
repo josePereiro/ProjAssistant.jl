@@ -1,12 +1,11 @@
-function create_proj_dirs(mod::Module)
-    for funname in (
-            :datdir, :srcdir, :plotsdir, :scriptsdir, 
-            :papersdir, :procdir, :rawdir, :cachedir, :devdir
+function create_proj_dirs(Proj::Module)
+    _check_is_proj(Proj)
+    for dirfun in (
+            datdir, plotsdir, scriptsdir, 
+            papersdir, procdir, rawdir, cachedir, devdir
         )
-        if isdefined(mod, funname)
-            dir = getproperty(mod, funname)()
-            !isdir(dir) && mkpath(dir)
-        end
+        dir = dirfun(Proj)
+        !isdir(dir) && mkpath(dir)
     end
 end
 
@@ -14,7 +13,6 @@ end
 macro create_proj_dirs()
     quote $(create_proj_dirs)(@__MODULE__) end
 end
-
 
 # TODO: Transform to your layout
 # function print_proj_layout()

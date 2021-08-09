@@ -13,7 +13,7 @@ _gids_invalid_syntax_err(ex) = error("Invalid syntax, use 'gid.gid...' or 'gid=g
 _parse_gids(::Vector{Symbol}, obj) = _gids_invalid_syntax_err(obj)
 
 ## ------------------------------------------------------
-function _lglob_macro_ex(mod::Module, exs...)
+function _lglob_macro_ex(Proj, exs...)
     # collect dat
     index = Dict{Symbol, Vector{Symbol}}()
     for ex in exs
@@ -42,12 +42,13 @@ function _lglob_macro_ex(mod::Module, exs...)
     end
 
     # expression
-    _lglob(gids) = mod.lglob(gids...)
-    ex = quote end
+    ex = quote 
+        !($(esc(Proj)) isa Module) && error($(Proj), "must be a Module identifier")
+    end
     for (ider, gids) in index
         ex = quote
             $(ex)
-            $(esc(ider)) = $(_lglob)($gids)
+            $(esc(ider)) = $(lglob)($(esc(Proj)), $(gids)...)
         end
     end
     ex = quote 
@@ -59,9 +60,10 @@ function _lglob_macro_ex(mod::Module, exs...)
 end
 
 ## ------------------------------------------------------
-_sglob_invalid_syntax_err(ex) = error("Invalid syntax, use 'gid' or 'gid.gid...=Expr'. At ex: ", ex)
+_sglob_invalid_syntax_err(ex) = error("Invalid syntax, use 'Proj gid' or 'Proj gid.gid...=Expr'. At ex: ", ex)
 
-function _sglob_macro_ex(mod::Module, exs...)
+function _sglob_macro_ex(Proj, exs...)
+    
     # collect dat
     index = Dict{Vector{Symbol}, Any}()
     for ex in exs
@@ -83,12 +85,13 @@ function _sglob_macro_ex(mod::Module, exs...)
     end
 
     # expression
-    _sglob(dat, gids) = mod.sglob(dat, gids...)
-    ex = quote end
+    ex = quote 
+        !($(esc(Proj)) isa Module) && error($(Proj), "must be a Module identifier")
+    end
     for (gids, datexpr) in index
         ex = quote
             $(ex)
-            $(_sglob)($(esc(datexpr)), $(gids))
+            $(sglob)($(esc(Proj)), $(esc(datexpr)), $(gids)...)
         end
     end
     ex = quote 

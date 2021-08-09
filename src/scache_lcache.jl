@@ -10,33 +10,34 @@ function is_cfname(fname)
 end
 
 ## ----------------------------------------------------------------------------
-function cfname(arg, args...)
-
-    isempty(args) && (arg isa AbstractString) && 
-        is_cfname(basename(arg)) && return basename(arg)
-    
+function _cfname(arg, args...)
     _hash = hash(hash.((arg, args...)))
-    cfile = dfname((;hash = _hash), CFNAME_EXT)
-    return cfile
+    dfname((;hash = _hash), CFNAME_EXT)
 end
 
-cfname() = cfname(time(), rand())
+_cfname() = _cfname(threadid(), time(), rand())
+
+cfname() = _cfname()
+cfname(str::AbstractString) = is_cfname(str) ? str : _cfname(str)
+function cfname(arg, args...)    
+    dir, args = _extract_dir(arg, args...)
+    return joinpath(dir, _cfname(args...))
+end
+
 
 ## ----------------------------------------------------------------------------
-function scache(dat, dirs::Vector{<:AbstractString}, arg, args...; 
-        headline::AbstractString = "CACHE SAVED",
-        verbose::Bool = global_conf(:VERBOSE), 
+function _scache(dat, cfile; 
         onerr::Function = (err) -> rethrow(err), 
-        print_fun::Function = global_conf(:PRINT_FUN), 
-        mkdir::Bool = global_conf(:MK_DIR)
+        print_fun::Function = global_conf(:PRINT_FUN),
+        mkdir::Bool = global_conf(:MK_DIR),
+        verbose::Bool = global_conf(:VERBOSE), 
+        msg::String = "",
     )
-
-    cfile = cfname(arg, args...)
-    cfile = joinpath(dirs..., cfile)
+    
     try
         mkdir && mkpath(dirname(cfile))
         serialize(cfile, Dict(DATA_KEY => dat))
-        verbose && _io_print(print_fun, headline, dat, cfile)
+        verbose && _io_print(print_fun, "CACHE SAVED", msg, dat, cfile)
     catch err
         verbose && _io_error_print(print_fun, err, cfile)
         onerr(err)
@@ -45,34 +46,32 @@ function scache(dat, dirs::Vector{<:AbstractString}, arg, args...;
 end
 
 # defaults
-scache(dat, arg, args...; kwargs...) = 
-    scache(dat, [global_conf(:CACHE_DIR)], arg, args...; kwargs...)
-    
-scache(f::Function, arg, args...; kwargs...) = 
-    scache(f(), [global_conf(:CACHE_DIR)], arg, args...; kwargs...)
-
-scache(dat; kwargs...) = 
-    scache(dat, [global_conf(:CACHE_DIR)], time(), rand(); kwargs...)
-
-scache(f::Function; kwargs...) = 
-    scache(f(), [global_conf(:CACHE_DIR)], time(), rand(); kwargs...)
+function scache(dat, dirv::Vector{<:AbstractString}, args...; kwargs...)
+    dir, args = _extract_dir(dirv, args...)
+    cfile = joinpath(dir, cfname(args...))
+    _scache(dat, cfile; kwargs...)
+end
+scache(dat, args...; kwargs...) = 
+    scache(dat, [global_conf(:CACHE_DIR)], args...; kwargs...)
+scache(f::Function, args...; kwargs...) = scache(f(), args...; kwargs...)
 
 ## ----------------------------------------------------------------------------
-function _lcache(f::Function, savecache::Bool, dirs::Vector{<:AbstractString}, arg, args...; 
-        headline::AbstractString = "CACHE LOADED",
-        verbose::Bool = global_conf(:VERBOSE), 
+function _lcache(f::Function, savecache::Bool, 
+        dirv::Vector{<:AbstractString}, arg, args...; 
         onerr::Function = (err) -> rethrow(err),
         print_fun::Function = global_conf(:PRINT_FUN), 
-        mkdir::Bool = global_conf(:MK_DIR)
+        mkdir::Bool = global_conf(:MK_DIR),
+        verbose::Bool = global_conf(:VERBOSE), 
+        msg::AbstractString = "",
     )
     
-    cfile = cfname(arg, args...)
-    cfile = joinpath(dirs..., cfile)
+    dir, args = _extract_dir(dirv, arg, args...)
+    cfile = joinpath(dir, cfname(args...))
     try
         mkdir && mkpath(dirname(cfile))
         dat = isfile(cfile) ? deserialize(cfile)[DATA_KEY] : f()
-        savecache && scache(dat, dirs, arg, args...; verbose, onerr, print_fun)
-        verbose && _io_print(print_fun, headline, dat, cfile)
+        savecache && _scache(dat, cfile; verbose, onerr, print_fun)
+        verbose && _io_print(print_fun, "CACHE LOADED", msg, dat, cfile)
         return dat
     catch err
         verbose && _io_error_print(print_fun, err, cfile)
@@ -80,58 +79,48 @@ function _lcache(f::Function, savecache::Bool, dirs::Vector{<:AbstractString}, a
     end
 end
 
-function lcache(f::Function, dirs::Vector{<:AbstractString}, arg, args...; 
-        kwargs...
-    ) 
-    _lcache(f, true, dirs, arg, args...; kwargs...)
-end
+lcache(f::Function, dirv::Vector{<:AbstractString}, arg, args...; kwargs...) =
+    _lcache(f, true, dirv, arg, args...; kwargs...)
 
 lcache(f::Function, arg, args...; kwargs...) = 
     lcache(f::Function, [global_conf(:CACHE_DIR)], arg, args...; kwargs...)
 
-function lcache(dirs::Vector{<:AbstractString}, arg, args...; kwargs...) 
-    _lcache(() -> nothing, false, dirs, arg, args...; kwargs...)
-end
+lcache(dirv::Vector{<:AbstractString}, arg, args...; kwargs...) =
+    _lcache(() -> nothing, false, dirv, arg, args...; kwargs...)
 
 lcache(arg, args...; kwargs...) = 
     lcache([global_conf(:CACHE_DIR)], arg, args...; kwargs...)
 
 ## ----------------------------------------------------------------------------
-function delcache(dirs::Vector{<:AbstractString}, arg, args...; 
+function delcache(dirv::Vector{<:AbstractString}, arg, args...; 
         verbose::Bool = global_conf(:VERBOSE), 
         print_fun::Function = global_conf(:PRINT_FUN)
     )
-    cfile = cfname(arg, args...)
-    cfile = joinpath(dirs..., cfile)
-    rm(cfile; force = true, recursive = true)
-    verbose && print_fun(relpath(cfile), " deleted!!!")
-    return cfile
-end
-
-delcache(arg, args...; kwargs...) = 
-    delcache([global_conf(:CACHE_DIR)], arg, args...; kwargs...)
-
-function delcache(dirs::Vector{<:AbstractString};
-        verbose::Bool = global_conf(:VERBOSE), 
-        print_fun::Function = global_conf(:PRINT_FUN)
-    )
-    cache_dir = joinpath(dirs...)
-    tcaches = filter(is_cfname, readdir(cache_dir))
-    for tc in tcaches
-        tc = joinpath(cache_dir, tc)
-        rm(tc, force = true)
-        verbose && print_fun(relpath(tc), " deleted!!!")
+    dir, args = _extract_dir(dirv, arg, args...)
+    path = isempty(args) ? dir : joinpath(dir, cfname(args...))
+    if isfile(path)
+        rm(path; force = true, recursive = true)
+        verbose && print_fun(relpath(path), " deleted!!!")
+        return path
+    elseif isdir(path)
+        tcaches = filter(is_cfname, readdir(path))
+        for tc in tcaches
+            tc = joinpath(path, tc)
+            rm(tc, force = true)
+            verbose && print_fun(relpath(tc), " deleted!!!")
+        end
+        return path
     end
-    return cache_dir
 end
 
-delcache(; kwargs...) = delcache([global_conf(:CACHE_DIR)]; kwargs...)
+delcache(args...; kwargs...) = 
+    delcache([global_conf(:CACHE_DIR)], args...; kwargs...)
 
 ## ----------------------------------------------------------------------------
-function exist_cache(dirs::Vector{<:AbstractString}, arg, args...)
-    cfile = cfname(arg, args...)
-    cfile = joinpath(dirs..., cfile)
-    isfile(cfile)
+function exist_cache(dirv::Vector{<:AbstractString}, arg, args...)
+    dir, args = _extract_dir(dirv, arg, args...)
+    cfile = joinpath(dir, cfname(args...))
+    return isfile(cfile)
 end
 exist_cache(arg, args...) = exist_cache([global_conf(:CACHE_DIR)], arg, args...)
     

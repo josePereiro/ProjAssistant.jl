@@ -1,5 +1,6 @@
-function _io_print(print_fun, headline, dat, file, more...)
+function _io_print(print_fun, headline, msg, dat, file, more...)
     print_fun(headline, 
+        isempty(msg) ? "" : string("\n", msg),
         "\ndir: ", relpath(dirname(abspath(file))),
         "\nfile: ", basename(file),
         "\nsize: ", filesize(file), " bytes",

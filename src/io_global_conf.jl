@@ -10,7 +10,7 @@ function _init_globals()
     _GLOBAL_CONF[:LOAD_FUN] = _load
     _GLOBAL_CONF[:SAVE_FUN] = _save
     _GLOBAL_CONF[:ADD_TAG] = false
-    _GLOBAL_CONF[:MK_DIR] = false
+    _GLOBAL_CONF[:MK_DIR] = true
 end
 
 ## ----------------------------------------------------------------------------

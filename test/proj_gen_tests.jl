@@ -19,7 +19,7 @@ for fun_flag in [true, false]
 
         # ---------------------------------------------------------------------
         # prepare test "project"
-        @info("Test project", TopMod, Sub1Mod, TopDir)
+        @info("Test project", TopMod, TopDir)
         @eval module $(TopMod)
 
             import ProjAssistant
@@ -79,128 +79,138 @@ for fun_flag in [true, false]
         @testset "gen_projects" begin
 
             ## ------------------------------------------------------------
-            # TopMod
-            for funname in (
-                    :projectdir,
-                    :devdir, :datdir, :srcdir, :plotsdir, :scriptsdir, :papersdir,
-                    :procdir, :rawdir, :cachedir, 
-                )
-                fun = getproperty(Top, funname)
-                @test isdir(fun())
-
-                df = fun("bla", (;A = 1), "jls")
-                @test ProjAssistant.isvalid_dfname(df)
-                @test df == fun(df)
-            end
-
-            # SubMod
-            for Mod in [Sub1, Sub3]
+            # static funs
+            for Proj in [Top, Sub1, Sub3]
                 for funname in (
-                        :plotsdir, :scriptsdir,
-                        :procdir, :rawdir, :cachedir,  
+                        :projdir,
+                        :devdir, :datdir, :srcdir, :plotsdir, :scriptsdir, :papersdir,
+                        :procdir, :rawdir, :cachedir, 
                     )
-                    fun = getproperty(Mod, funname)
-                    @test isdir(fun())
+                    fun = getproperty(ProjAssistant, funname)
 
-                    df = fun("bla", (;A = 1), "jls")
+                    df = fun(Proj, "bla", (;A = 1), "jls")
                     @test ProjAssistant.isvalid_dfname(df)
-                    @test df == fun(df)
-
-                    sub1fun = getproperty(Sub1, funname)
-                    sub3fun = getproperty(Sub3, funname)
-
-                    @test sub1fun() == dirname(sub3fun())
+                    @test df == fun(Proj, basename(df))
                 end
-            end
 
-            @test Top.istop_proj()
-            @test !Sub1.istop_proj()
-            @test !Sub3.istop_proj()
+            end
+            
+            @test procdir(Top) != datdir(Top)
+            @test procdir(Sub1) == datdir(Sub1)
+            @test procdir(Sub3) == datdir(Sub3)
+
+            @test istop_proj(Top)
+            @test !istop_proj(Sub1)
+            @test !istop_proj(Sub3)
 
             ## ------------------------------------------------------------
             # save/load data
             for Mod in [Top, Sub1, Sub3]
+
                 @info("save/load data", Mod)
                 mkdir = true
-                for (sfunsym, lfunsym) in [
-                        (:sprocdat, :lprocdat), 
-                        (:srawdat, :lrawdat), 
-                        (:sdat, :ldat)
+                for (sfun, lfun) in [
+                        (sprocdat, lprocdat), 
+                        (srawdat, lrawdat), 
+                        (sdat, ldat)
                     ]
-
-                    @show sfunsym, lfunsym
-                    sfun = getproperty(Mod, sfunsym)
-                    lfun = getproperty(Mod, lfunsym)
 
                     dat0 = rand(10, 10)
 
                     for fargs in [
-                            ("test_file", (;h = hash(dat0)), "jls"),
-                            (["subdir"], "test_file", (;h = hash(dat0)), "jls"),
-                        ]
-                        cfile1 = sfun(dat0, fargs...; mkdir)
+                                ("test_file", (;h = hash(dat0)), "jls"),
+                                (["subdir"], "test_file", (;h = hash(dat0)), "jls"),
+                            ]
+
+                        cfile1 = sfun(Mod, dat0, fargs...; mkdir)
                         @test isfile(cfile1)
-                        dat1 = lfun(fargs...)
+                        dat1 = lfun(Mod, fargs...)
                         @test all(dat0 .== dat1)
-                        dat1 = lfun(cfile1)
+                        dat1 = lfun(Mod, cfile1)
                         @test all(dat0 .== dat1)
-                        cfile2 = sfun(dat0, cfile1; mkdir)
-                        @test cfile1 == cfile2
-                        dat1 = lfun(cfile1)
+                        cfile2 = sfun(Mod, dat0, basename(cfile1); mkdir)
+                        @test basename(cfile1) == basename(cfile2)
+                        dat1 = lfun(Mod, cfile2)
                         @test all(dat0 .== dat1)
                     end
                     
-                    @test lfun("NOT_A_FILE", hash(tempname()), ".jls") do
+                    @test lfun(Mod, "NOT_A_FILE", hash(tempname()), ".jls") do
                         true
                     end
-                end
-            end
+                end # for (sfun, lfun)
+            end # for Mod
 
             ## ------------------------------------------------------------
             # save/load cache
-            @info("Top cache")
-            for Mod in [Top, Sub1, Sub3]
+            for Proj in [Top, Sub1, Sub3]
 
-                @info("save/load cache", Mod)
-                scache = Mod.scache
-                lcache = Mod.lcache
-                cachedir = Mod.cachedir
+                @info("save/load cache", Proj)
 
                 dat0 = rand(10, 10)
                 
                 cid = (:TEST, :CACHE, hash(dat0))
-                cfile = scache(dat0, cid)
+                cfile = scache(Proj, dat0, cid)
                 @test isfile(cfile)
-                dat1 = lcache(cid)
+                dat1 = lcache(Proj, cid)
                 @test all(dat0 .== dat1)
                 
-                cfile = scache(dat0)
+                cfile = scache(Proj, dat0)
                 @test isfile(cfile)
-                dat1 = lcache(cfile)
+                dat1 = lcache(Proj, cfile)
+                @test all(dat0 .== dat1)
+
+            end
+
+            ## ------------------------------------------------------------
+            # sglob/lglob
+            for Proj in [Sub1, Sub3]
+
+                @info("sglob/lglob", Proj)
+
+                gfile = globfile(Proj, :test, :glob)
+                rm(gfile; force = true)
+                @assert !isfile(gfile)
+
+                # funs
+                dat0 = rand(10,10)
+                sglob(Proj, dat0, :test, :glob)
+                @test isfile(gfile)
+
+                dat1 = lglob(Proj, :test, :glob)
+                @test all(dat0 .== dat1)
+
+                # macros
+                rm(gfile; force = true)
+                @assert !isfile(gfile)
+                
+                dat0 = rand(10,10)
+                @sglob Proj test.glob=dat0
+                @test isfile(gfile)
+
+                @lglob Proj dat1=test.glob
                 @test all(dat0 .== dat1)
 
             end
 
             ## ------------------------------------------------------------
             # save imgs
-            @info("Top cache")
-            for Mod in [Top, Sub1, Sub3]
+            for Proj in [Top, Sub1, Sub3]
 
-                @info("save imgs", Mod)
-                figfile0 = Mod.plotsdir("test", (;A = 1), ".png")
+                @info("save imgs", Proj)
+                figfile0 = plotsdir(Proj, "test", (;A = 1), ".png")
 
                 p = plot(rand(100))
-                figfile1 = Mod.sfig(p, "test", (;A = 1), ".png")
+                figfile1 = sfig(Proj, p, "test", (;A = 1), ".png")
                 @test figfile0 == figfile1
                 @test isfile(figfile1)
 
                 ps = map((_) -> plot(rand(100)), 1:10)
-                figfile1 = Mod.sfig(ps, "test", (;A = 1), ".png")
+                figfile1 = sfig(Proj, ps, "test", (;A = 1), ".png")
                 @test figfile0 == figfile1
                 @test isfile(figfile1)
 
-                figfile0 = Mod.plotsdir("test", (;A = 1), ".gif")
-                figfile1 = Mod.sgif(ps, "test", (;A = 1), ".gif")
+                figfile0 = plotsdir(Proj, "test", (;A = 1), ".gif")
+                figfile1 = sgif(Proj, ps, "test", (;A = 1), ".gif")
                 @test figfile0 == figfile1
                 @test isfile(figfile1)
 
