@@ -425,7 +425,7 @@ version = "3.1.2+0"
 
 [[ImgTools]]
 deps = ["Colors", "DataFileNames", "FileIO", "FixedPointNumbers", "Images", "Plots"]
-path = "/Users/Pereiro/.julia/dev/ImgTools"
+git-tree-sha1 = "0752179cbbfc0663c3ba92fa794aa8d9f354f333"
 uuid = "60a16571-0043-4368-b1b0-a5366d36b020"
 version = "0.2.0"
 
