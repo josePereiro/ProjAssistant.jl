@@ -1,7 +1,7 @@
 name = "ProjAssistant"
 uuid = "df388e3e-013c-4f8d-ba67-f4afa1ff006b"
 authors = ["josePereiro <jose.pereiro.lab@gmail.com> and contributors"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 DataFileNames = "82dba31a-8ab6-430f-a22d-9cbb81344561"
