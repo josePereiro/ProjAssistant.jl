@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 DataFileNames = "82dba31a-8ab6-430f-a22d-9cbb81344561"
 DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+ExtractMacro = "f86d3d12-fd5b-522c-99e9-61577282a1e9"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
 ImgTools = "60a16571-0043-4368-b1b0-a5366d36b020"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"

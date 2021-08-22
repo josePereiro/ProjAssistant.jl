@@ -8,20 +8,16 @@ function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
 
     # ---------------------------------------------------------------------
     # Check symbols
-    _check_symbols(currmod, 
-        [
-            :_PROJ_ASSIST_PARENT_PROJ, 
-            :_PROJ_ASSIST_TOP_PROJ
-        ]
-    )
+    _check_symbols(mod, [:_PROJ_ASSIST_CONF])
 
     # ---------------------------------------------------------------------
     # top funs
     @eval currmod begin
-        const _PROJ_ASSIST_TOP_PROJ = $(topproj)($(parentmod))
-        const _PROJ_ASSIST_PARENT_PROJ = $(parentmod)
+        const _PROJ_ASSIST_CONF = Dict{Symbol, Any}()
+        _PROJ_ASSIST_CONF[:PARENT_PROJ] = $(parentmod)
+        _PROJ_ASSIST_CONF[:TOP_PROJ] = $(topproj)($(parentmod))
+        nothing
     end
-    
 end
 
 # ---------------------------------------------------------------------

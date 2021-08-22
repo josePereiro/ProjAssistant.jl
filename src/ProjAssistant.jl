@@ -8,6 +8,7 @@ module ProjAssistant
     import FileIO
     import Requires: @require
     
+    using ExtractMacro
     using Base.Threads
     using DataFileNames
 
@@ -26,18 +27,27 @@ module ProjAssistant
     include("sglob_lglob_macros_ex.jl")
     include("sglob_lglob.jl")
     include("proj_functions.jl")
+    include("fileid.jl")
 
-    export dfname, parse_dfname
     export parentproj, topproj, istop_proj
-    export projdir, projname
+    export projdir, projname, set_projdir
     export devdir, datdir, srcdir, plotsdir, scriptsdir, paperdir
     export cachedir, procdir, rawdir
-    export lsdevdir, lsdatdir, lssrcdir, lsplotsdir, lsscriptsdir, 
+    export lsdevdir, lsdatdir, lssrcdir, lsplotsdir, lsscriptsdir,
            lspapersdir, lsprocdir, lsrawdir, lscachedir
     export sdat, sprocdat, srawdat, sfig, sgif
-    export ldat, lprocdat, lrawdat
+    export ldat, lprocdat, lrawdat, lfig
     export cfname, is_cfname, scache, lcache, delcache
     export globfile, sglob, lglob, delglob, @lglob, @sglob
+    export gen_top_proj, @gen_top_proj
+    export gen_sub_proj, @gen_sub_proj
+    export create_proj_dirs, @create_proj_dirs
+    export @fileid
+
+    # Re-exports
+    export dfname, parse_dfname
+    export quickactivate, @quickactivate
+    export @extract
 
     function __init__()
         _init_globals()

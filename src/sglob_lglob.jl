@@ -37,7 +37,7 @@ function sglob(Proj::Module; gids...)
     end
 end
 
-sglob(f::Function, Proj::Module, gid::Symbol, gids::Symbol...) = sglob(Proj, f(), gid, gids)
+sglob(f::Function, Proj::Module, gid::Symbol, gids::Symbol...) = sglob(Proj, f(), gid, gids...)
 
 macro sglob(Proj::Symbol, ex, exs...)
     _sglob_macro_ex(Proj, ex, exs...)

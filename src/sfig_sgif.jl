@@ -2,6 +2,11 @@ _sfig(x...; k...) = isdefined(ProjAssistant, :ImgTools) ?
     ImgTools.sfig(x...; k...) : error("You must 'import Plots'")
 _sgif(x...; k...) = isdefined(ProjAssistant, :ImgTools) ? 
     ImgTools.sgif(x...; k...) : error("You must 'import Plots'")
+_lfig(x...) = isdefined(ProjAssistant, :ImgTools) ? 
+    ImgTools.lfig(x...) : error("You must 'import Plots'")
+
+
+lfig(x...) = _lfig(x...)
 
 function sfig(p, arg, args...; 
         print_fun::Function = global_conf(:PRINT_FUN), 

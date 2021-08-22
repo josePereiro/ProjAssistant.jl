@@ -1,20 +1,22 @@
 ## ------------------------------------------------------------
 # utils 
-_is_proj(Proj::Module) = isdefined(Proj, :_PROJ_ASSIST_TOP_PROJ)
+_is_proj(Proj::Module) = isdefined(Proj, :_PROJ_ASSIST_CONF)
 _check_is_proj(Proj::Module) = !_is_proj(Proj) && error("Module ", nameof(Proj), 
     " is not a ProjAssistant project. See `gen_sub_proj` or `gen_top_proj`"
 )
 
 ## ---------------------------------------------------------------------
 # top funs
-parentproj(Proj::Module) = (_check_is_proj(Proj); Proj._PROJ_ASSIST_PARENT_PROJ)
-topproj(Proj::Module) = (_check_is_proj(Proj); Proj._PROJ_ASSIST_TOP_PROJ)
+parentproj(Proj::Module) = (_check_is_proj(Proj); Proj._PROJ_ASSIST_CONF[:PARENT_PROJ])
+topproj(Proj::Module) = (_check_is_proj(Proj); Proj._PROJ_ASSIST_CONF[:TOP_PROJ])
 projname(Proj::Module) = string(nameof(Proj))
-istop_proj(Proj::Module) = parentproj(Proj) === Proj
+istop_proj(Proj::Module) = (parentproj(Proj) === Proj)
 
 ## ---------------------------------------------------------------------
 # top folders
-projdir(Proj::Module) = topproj(Proj)._PROJ_ASSIST_PROJECT_DIR
+set_projdir(Proj::Module, dir::AbstractString) = 
+    (topproj(Proj)._PROJ_ASSIST_CONF[:ROOT_DIR] = dir)
+projdir(Proj::Module) = topproj(Proj)._PROJ_ASSIST_CONF[:ROOT_DIR]
 projdir(Proj::Module, dfargs...) = dfname([projdir(Proj)], dfargs...)
 
 for (funname, dirname) = [
@@ -43,7 +45,7 @@ end
 ## ---------------------------------------------------------------------
 # sub data folders
 for (funname, dirname) = [
-        (:procdir, "proc"), (:rawdir, "raw"),
+        (:procdir, "processed"), (:rawdir, "raw"),
     ]
     @eval begin
         function $(funname)(Proj::Module, dfargs...)

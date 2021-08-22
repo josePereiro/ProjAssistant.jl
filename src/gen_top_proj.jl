@@ -18,19 +18,15 @@ function gen_top_proj(mod::Module, dir = nothing)
     end
         
     # Check symbols
-    _check_symbols(mod, 
-        [
-            :_PROJ_ASSIST_PROJECT_DIR, 
-            :_PROJ_ASSIST_PARENT_PROJ, 
-            :_PROJ_ASSIST_TOP_PROJ
-        ]
-    )
+    _check_symbols(mod, [:_PROJ_ASSIST_CONF])
     
     # eval
     @eval mod begin
-        const _PROJ_ASSIST_PROJECT_DIR = $(dir)
-        const _PROJ_ASSIST_PARENT_PROJ = $(mod)
-        const _PROJ_ASSIST_TOP_PROJ = $(mod)
+        const _PROJ_ASSIST_CONF = Dict{Symbol, Any}()
+        _PROJ_ASSIST_CONF[:ROOT_DIR] = $(dir)
+        _PROJ_ASSIST_CONF[:PARENT_PROJ] = $(mod)
+        _PROJ_ASSIST_CONF[:TOP_PROJ] = $(mod)
+        nothing
     end
 end
 
