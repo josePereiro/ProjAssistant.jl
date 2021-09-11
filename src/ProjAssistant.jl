@@ -7,7 +7,7 @@ module ProjAssistant
     import Serialization: serialize, deserialize
     import FileIO
     import Requires: @require
-    
+    using FilesTreeTools
     using ExtractMacro
     using Base.Threads
     using DataFileNames
@@ -19,7 +19,6 @@ module ProjAssistant
     include("scache_lcache.jl")
     include("sdat_ldat.jl")
     include("group_files.jl")
-    include("walkdown.jl")
     include("gen_sub_proj.jl")
     include("gen_top_proj.jl")
     include("create_proj_dirs.jl")
@@ -48,6 +47,7 @@ module ProjAssistant
     export dfname, parse_dfname
     export quickactivate, @quickactivate
     export @extract
+    export walkdown, filtertree
 
     function __init__()
         _init_globals()
