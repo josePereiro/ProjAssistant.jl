@@ -1,12 +1,12 @@
 module ProjAssistant
 
     import DrWatson
-    import DrWatson: quickactivate, @quickactivate
     import Logging
     import Logging: SimpleLogger, global_logger, with_logger
     import Serialization: serialize, deserialize
     import FileIO
     import Requires: @require
+    import Pkg
     using FilesTreeTools
     using ExtractMacro
     using Base.Threads
@@ -27,6 +27,7 @@ module ProjAssistant
     include("sglob_lglob.jl")
     include("proj_functions.jl")
     include("fileid.jl")
+    include("quickactivate.jl")
 
     export parentproj, topproj, istop_proj
     export projdir, projname, set_projdir
@@ -42,10 +43,10 @@ module ProjAssistant
     export gen_sub_proj, @gen_sub_proj
     export create_proj_dirs, @create_proj_dirs
     export @fileid
+    export quickactivate, @quickactivate
 
     # Re-exports
     export dfname, parse_dfname
-    export quickactivate, @quickactivate
     export @extract
     export walkdown, filtertree
 
