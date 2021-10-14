@@ -10,6 +10,9 @@ end
 # ---------------------------------------------------------------------
 function gen_top_proj(mod::Module, dir = nothing)
 
+    # check proj
+    _is_proj(mod) && error("Module ($(mod)) is already a ProjAssitant project.")
+
     # dir
     if isnothing(dir)
         modpath = pathof(mod)

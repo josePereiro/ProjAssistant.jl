@@ -1,10 +1,16 @@
+function _find_parent_proj(currmod)
+    parent = parentmodule(currmod)
+    (currmod == parent) && return parent
+    _is_proj(parent) && return parent
+    _find_parent_proj(parent)
+end
 
-
-function gen_sub_proj(currmod::Module, parentmod = parentmodule(currmod))
+function gen_sub_proj(currmod::Module, parentmod = _find_parent_proj(currmod))
 
     # ---------------------------------------------------------------------
     # Check parenthood
-    !_is_proj(parentmod) && error("Parent module ($(parentmod)) is not a project.")
+    _is_proj(currmod) && error("Module ($(currmod)) is already a ProjAssitant project.")
+    !_is_proj(parentmod) && error("Parent module ($(parentmod)) is not a ProjAssitant project.")
 
     # ---------------------------------------------------------------------
     # Check symbols

@@ -47,7 +47,7 @@ for fun_flag in [true, false]
                         import Main.$(TopMod).$(Sub1Mod)
                         import ProjAssistant
                         
-                        if $(fun_flag); ProjAssistant.gen_sub_proj(@__MODULE__, $(Sub1Mod))
+                        if $(fun_flag); ProjAssistant.gen_sub_proj(@__MODULE__)
                             else; ProjAssistant.@gen_sub_proj(parent=$(Sub1Mod))
                         end
 
@@ -102,6 +102,15 @@ for fun_flag in [true, false]
             @test istop_proj(Top)
             @test !istop_proj(Sub1)
             @test !istop_proj(Sub3)
+
+            ## ------------------------------------------------------------
+            @info("dirtree")
+            for dirfun in [
+                    devdir, datdir, srcdir, plotsdir, scriptsdir, papersdir,
+                    procdir, rawdir, cachedir
+                ]
+                @test dirfun(Sub1) == dirname(dirfun(Sub3))
+            end
 
             ## ------------------------------------------------------------
             # save/load data

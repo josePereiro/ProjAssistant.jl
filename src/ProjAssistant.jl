@@ -31,7 +31,7 @@ module ProjAssistant
 
     export parentproj, topproj, istop_proj
     export projdir, projname, set_projdir
-    export devdir, datdir, srcdir, plotsdir, scriptsdir, paperdir
+    export devdir, datdir, srcdir, plotsdir, scriptsdir, papersdir
     export cachedir, procdir, rawdir
     export lsdevdir, lsdatdir, lssrcdir, lsplotsdir, lsscriptsdir,
            lspapersdir, lsprocdir, lsrawdir, lscachedir
