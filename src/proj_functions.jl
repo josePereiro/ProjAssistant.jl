@@ -29,7 +29,7 @@ for (funname, dirname) = [
         function $(funname)(Proj::Module, dfargs...)
             rootdir = istop_proj(Proj) ? 
                 projdir(Proj, [$(dirname)]) :
-                $(funname)(topproj(Proj), [projname(Proj)])
+                $(funname)(parentproj(Proj), [projname(Proj)])
             dfname([rootdir], dfargs...)
         end
     end
@@ -51,7 +51,7 @@ for (funname, dirname) = [
         function $(funname)(Proj::Module, dfargs...)
             rootdir = istop_proj(Proj) ? 
                 datdir(Proj, [$(dirname)]) :
-                $(funname)(topproj(Proj), [projname(Proj)])
+                $(funname)(parentproj(Proj), [projname(Proj)])
             dfname([rootdir], dfargs...)
         end 
     end
@@ -60,7 +60,7 @@ end
 function cachedir(Proj, dfargs...)
     rootdir = istop_proj(Proj) ? 
         datdir(Proj, ["cache"]) :
-        cachedir(topproj(Proj), [projname(Proj)])
+        cachedir(parentproj(Proj), [projname(Proj)])
     dir, dfargs = _extract_dir(dfargs...)
     rootdir = isempty(dir) ? rootdir : joinpath(rootdir, dir)
     return isempty(dfargs) ? rootdir : joinpath(rootdir, cfname(dfargs...))
